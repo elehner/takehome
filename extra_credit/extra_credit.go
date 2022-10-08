@@ -65,16 +65,12 @@ func swapTwoIntegers(a *int, b *int) {
 }
 
 func simpleCachingTest() {
-	cache := Cache{}
-	cache.Init()
+	cache := NewCache()
 
 	// Simple RW
 	cache.Write("test", "some value here")
 	value := cache.Read("test").(string)
 	fmt.Printf("Value was '%s'\n", value)
-
-	// Still have to ensure it resolves concurrent reads/writes.
-	// Will likely want to use a benchmark to spawn multiple processes.
 }
 
 type Cache struct {
@@ -82,9 +78,11 @@ type Cache struct {
 	rwlock sync.RWMutex
 }
 
-func (c *Cache) Init() {
+func NewCache() *Cache {
+	c := Cache{}
 	c.cache = make(map[string]interface{})
 	c.rwlock = sync.RWMutex{}
+	return &c
 }
 
 func (c *Cache) Read(key string) interface{} {

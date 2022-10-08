@@ -41,4 +41,6 @@ Same as the server above (requires golang)
 ## Testing
 Tests will also be run by `go test ./..`, but the majority of the asks were for examples, so I leaned towards print statements showing the operation for most functions.
 
+Further, you can run the benchmark tests using `go test -bench . ./extra_credit/`
+
 Those can be run by directly running the extra_credit.go file: `go run extra_credit/extra_credit.go`.
