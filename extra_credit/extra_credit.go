@@ -73,7 +73,14 @@ func simpleCachingTest() {
 	fmt.Printf("Value was '%s'\n", value)
 }
 
+// Very simple caching structure. For more advanced use cases,
+// you would likely want to use https://pkg.go.dev/sync#Map.
+// Using a plain map here due to the comment in that package:
+// "Most code should use a plain Go map instead, with separate locking or coordination".
 type Cache struct {
+	// interface is the most flexible, though admittedly could
+	// get you into trouble due to lack of type safety.
+	// Done here to see how well it would work
 	cache  map[string]interface{}
 	rwlock sync.RWMutex
 }
