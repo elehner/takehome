@@ -14,8 +14,6 @@ type UserInput struct {
 	CreatedOn   *int64  `json:"created_on"`
 }
 
-var dobLayout = "2006-01-02"
-
 // Validates whether or not a given UserInput is valid (all fields are defined)
 func (ui UserInput) validate() error {
 	if ui.UserId == nil || ui.Name == nil || ui.DateOfBirth == nil || ui.CreatedOn == nil {
@@ -35,7 +33,7 @@ func (ui UserInput) generateUserOutput() (userOutput UserOutput, err error) {
 	}
 
 	// attempt to extract the day of the week from the date of birth
-	dateOfBirth, err := time.Parse(dobLayout, *ui.DateOfBirth)
+	dateOfBirth, err := time.Parse("2006-01-02", *ui.DateOfBirth)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error occurred while parsing the user's DOB: %s", err.Error())
 		return userOutput, err

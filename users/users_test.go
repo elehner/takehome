@@ -24,7 +24,7 @@ func TestNonPostError(t *testing.T) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		t.Errorf("Erro: %v", err)
+		t.Errorf("Error: %v", err)
 	}
 	if strings.TrimSpace(string(body)) != ErrorMethodNotSupported {
 		t.Errorf("Body was %s, expected %s", string(body), ErrorMethodNotSupported)

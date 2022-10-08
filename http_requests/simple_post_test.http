@@ -1,3 +1,5 @@
+### User tests ###
+
 GET http://localhost:8080/user
 Content-Type: application/json
 
@@ -21,3 +23,24 @@ Content-Type: application/json
 
 POST http://localhost:8080/user
 Content-Type: application/json
+
+### Image Conversion tests ###
+
+POST http://localhost:8080/image
+Content-Type: image/jpeg
+
+< ../images/test_images/test_image.jpeg
+
+###
+
+POST http://localhost:8080/image
+Content-Type: image/jpeg
+
+< small_test_image.jpeg
+
+###
+
+POST http://localhost:8080/image
+Content-Type: image/jpeg
+
+< not_a_jpeg_image.png
