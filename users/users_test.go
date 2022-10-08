@@ -41,13 +41,17 @@ func TestHandleUserRequestPostResponses(t *testing.T) {
 		{"", http.StatusNoContent, ""},
 		{"[]", http.StatusOK, "[]"},
 		{"this is not json", http.StatusBadRequest, ErrorParsingInput},
-		// cannot process requests with malformed dates
-		{"[{}]", http.StatusInternalServerError, ErrorProcessingInput},
-		// Can parse partial values
+		// Treats partial objects as bad requests
 		{
 			`[{"date_of_birth": "1983-05-12"}]`,
-			http.StatusOK,
-			`[{"user_id":0,"name":"","weekday_of_birth":"Thursday","created_on":"1969-12-31T19:00:00-05:00"}]`,
+			http.StatusBadRequest,
+			ErrorParsingInput,
+		},
+		// cannot process requests with malformed dates
+		{
+			`[{"user_id": 1, "name": "Joe Smith", "date_of_birth": "1983-05-124", "created_on": 1642612034 }]`,
+			http.StatusInternalServerError,
+			ErrorProcessingInput,
 		},
 		// Can parse the expected values
 		{
@@ -105,20 +109,18 @@ func TestProcessUserInputs(t *testing.T) {
 		// Can parse partial values
 		{
 			`[{"date_of_birth": "1983-05-12", "created_on": 1642612034 }]`,
-			false,
-			[]UserInput{
-				{DateOfBirth: "1983-05-12", CreatedOn: 1642612034},
-			},
+			true,
+			nil,
 		},
+		{"[{}]", true, nil},
 		// Can parse the expected values
 		{"", false, nil},
 		{"[]", false, []UserInput{}},
-		{"[{}]", false, []UserInput{{}}},
 		{
 			`[{"user_id": 1, "name": "Joe Smith", "date_of_birth": "1983-05-12", "created_on": 1642612034 }]`,
 			false,
 			[]UserInput{
-				{UserId: 1, Name: "Joe Smith", DateOfBirth: "1983-05-12", CreatedOn: 1642612034},
+				baseUserInputGen(1, "Joe Smith", "1983-05-12", 1642612034),
 			},
 		},
 		{
@@ -129,9 +131,9 @@ func TestProcessUserInputs(t *testing.T) {
 			]`,
 			false,
 			[]UserInput{
-				{UserId: 1, Name: "Joe Smith", DateOfBirth: "1983-05-12", CreatedOn: 1642612034},
-				{UserId: 2, Name: "Jane Smith", DateOfBirth: "1984-05-12", CreatedOn: 1642612035},
-				{UserId: 3, Name: "Doe Smith", DateOfBirth: "1985-05-12", CreatedOn: 1642612036},
+				baseUserInputGen(1, "Joe Smith", "1983-05-12", 1642612034),
+				baseUserInputGen(2, "Jane Smith", "1984-05-12", 1642612035),
+				baseUserInputGen(3, "Doe Smith", "1985-05-12", 1642612036),
 			},
 		},
 	}
@@ -157,23 +159,20 @@ func TestTransformUserInputs(t *testing.T) {
 		expectedUserOutputs []UserOutput
 	}{
 		// Throws error when it cannot parse the given struct
-		// due to an invalid or non-existent date of birth
-		{[]UserInput{{}}, true, nil},
-		{[]UserInput{{UserId: 1, Name: "Joe Smith", DateOfBirth: "1983-05-124", CreatedOn: 1642612034}}, true, nil},
-		{[]UserInput{{DateOfBirth: "1983-05-124"}}, true, nil},
+		// due to an invalid date of birth
+		{[]UserInput{baseUserInputGen(1, "Joe Smith", "1983-05-124", 1642612034)}, true, nil},
 		// Can parse valid structures,
 		{[]UserInput{}, false, []UserOutput{}},
-		{[]UserInput{{DateOfBirth: "1983-05-11"}}, false, []UserOutput{{WeekdayOfBirth: "Wednesday", CreatedOn: "1969-12-31T19:00:00-05:00"}}},
 		{
-			[]UserInput{{UserId: 1, Name: "Joe Smith", DateOfBirth: "1983-05-12", CreatedOn: 1642612034}},
+			[]UserInput{baseUserInputGen(1, "Joe Smith", "1983-05-12", 1642612034)},
 			false,
 			[]UserOutput{{UserId: 1, Name: "Joe Smith", WeekdayOfBirth: "Thursday", CreatedOn: "2022-01-19T12:07:14-05:00"}},
 		},
 		{
 			[]UserInput{
-				{UserId: 1, Name: "Solomon Grundy", DateOfBirth: "1983-05-09", CreatedOn: 1642612034},
-				{UserId: 2, Name: "Jane Smith", DateOfBirth: "1984-05-10", CreatedOn: 1642612035},
-				{UserId: 3, Name: "Doe Smith", DateOfBirth: "1985-05-11", CreatedOn: 1642612036},
+				baseUserInputGen(1, "Solomon Grundy", "1983-05-09", 1642612034),
+				baseUserInputGen(2, "Jane Smith", "1984-05-10", 1642612035),
+				baseUserInputGen(3, "Doe Smith", "1985-05-11", 1642612036),
 			},
 			false,
 			[]UserOutput{
@@ -194,5 +193,20 @@ func TestTransformUserInputs(t *testing.T) {
 				t.Errorf("Received: %v, Expected: %v", userOutputs, test.expectedUserOutputs)
 			}
 		})
+	}
+}
+
+func baseUserInputGen(id int, name string, dateOfBirth string, createdOn int64) UserInput {
+	return UserInput{
+		UserId:      &id,
+		Name:        &name,
+		DateOfBirth: &dateOfBirth,
+		CreatedOn:   &createdOn,
+	}
+}
+
+func partialUserInputGen(dateOfBirth string) UserInput {
+	return UserInput{
+		DateOfBirth: &dateOfBirth,
 	}
 }

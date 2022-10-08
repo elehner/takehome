@@ -74,6 +74,14 @@ func processUserInputs(body *io.ReadCloser) (userInputs []UserInput, err error) 
 		}
 	}
 
+	// Validate the parsed input objects
+	for _, userInput := range userInputs {
+		err = userInput.validate()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return userInputs, err
 }
 
@@ -85,7 +93,6 @@ func transformUserInputs(userInputs []UserInput) (userOutputs []UserOutput, err 
 	for index, userInput := range userInputs {
 		userOutputs[index], err = userInput.generateUserOutput()
 		if err != nil {
-			// the underlying library should print the correct error messages
 			return nil, err
 		}
 	}
