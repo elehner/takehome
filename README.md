@@ -33,3 +33,12 @@ Install [Postgres}](https://www.postgresql.org/download/)
 ## Running the SQL
 The SQL exists in the project3/project3.sql file.
 The SQL can be copy/pasted into the server, or run all at once by using `\i <full path name>`, though it can be harder to follow when run that way.
+
+# Extra credit
+## Install
+Same as the server above (requires golang)
+
+## Testing
+Tests will also be run by `go test ./..`, but the majority of the asks were for examples, so I leaned towards print statements showing the operation for most functions.
+
+Those can be run by directly running the extra_credit.go file: `go run extra_credit/extra_credit.go`.
