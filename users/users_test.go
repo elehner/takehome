@@ -106,13 +106,30 @@ func TestProcessUserInputs(t *testing.T) {
 		{"this is not json", true, nil},
 		// Throws error when not an array is parsed
 		{"{}", true, nil},
-		// Can parse partial values
+		// Throws error when parsing partial values
 		{
 			`[{"date_of_birth": "1983-05-12", "created_on": 1642612034 }]`,
 			true,
 			nil,
 		},
 		{"[{}]", true, nil},
+		// Treats objects with bad data (where string is passed where int should be
+		// or vice-versa) as bad requests
+		{
+			`[{"user_id": "this is not a number", "name": "Joe Smith", "date_of_birth": "1983-05-12", "created_on": 1642612034 }]`,
+			true,
+			nil,
+		},
+		{
+			`[{"user_id": 1, "name": "Joe Smith", "date_of_birth": "1983-05-12", "created_on": "123Whoops" }]`,
+			true,
+			nil,
+		},
+		{
+			`[{"user_id": 1, "name": 10, "date_of_birth": "1983-05-12", "created_on": 1642612034 }]`,
+			true,
+			nil,
+		},
 		// Can parse the expected values
 		{"", false, nil},
 		{"[]", false, []UserInput{}},
@@ -172,13 +189,13 @@ func TestTransformUserInputs(t *testing.T) {
 			[]UserInput{
 				baseUserInputGen(1, "Solomon Grundy", "1983-05-09", 1642612034),
 				baseUserInputGen(2, "Jane Smith", "1984-05-10", 1642612035),
-				baseUserInputGen(3, "Doe Smith", "1985-05-11", 1642612036),
+				baseUserInputGen(3, "Doe Smith", "1985-05-11", 1250000000),
 			},
 			false,
 			[]UserOutput{
 				{UserId: 1, Name: "Solomon Grundy", WeekdayOfBirth: "Monday", CreatedOn: "2022-01-19T12:07:14-05:00"},
 				{UserId: 2, Name: "Jane Smith", WeekdayOfBirth: "Thursday", CreatedOn: "2022-01-19T12:07:15-05:00"},
-				{UserId: 3, Name: "Doe Smith", WeekdayOfBirth: "Saturday", CreatedOn: "2022-01-19T12:07:16-05:00"},
+				{UserId: 3, Name: "Doe Smith", WeekdayOfBirth: "Saturday", CreatedOn: "2009-08-11T09:13:20-05:00"},
 			},
 		},
 	}
