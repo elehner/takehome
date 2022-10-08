@@ -204,9 +204,3 @@ func baseUserInputGen(id int, name string, dateOfBirth string, createdOn int64) 
 		CreatedOn:   &createdOn,
 	}
 }
-
-func partialUserInputGen(dateOfBirth string) UserInput {
-	return UserInput{
-		DateOfBirth: &dateOfBirth,
-	}
-}
